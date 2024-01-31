@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from . import data
 
@@ -14,19 +15,36 @@ def parse_args():
     commands = parser.add_subparsers(dest='command')
     commands.required = True
 
+    # init command
     init_parser = commands.add_parser('init')
     init_parser.set_defaults(func=init)
 
+    # hash-object command
     hash_object_parser = commands.add_parser('hash-object')
     hash_object_parser.set_defaults(func=hash_object)
     hash_object_parser.add_argument('file')
 
+    # cat-file command
+    cat_file_parser = commands.add_parser('cat-file')
+    cat_file_parser.set_defaults(func=cat_file)
+    cat_file_parser.add_argument('object')
+
     return parser.parse_args()
 
+
+# Init function will create .ugit directory. This functionality is separated into data.py
 def init(args):
     data.init()
     print(f'Initialized empty ugit repository in {os.path.join(os.getcwd(), data.GIT_DIR)}')
 
+
+# Save file contents under the hashed name
 def hash_object(args):
     with open(args.file, 'rb') as f:
         print(data.hash_object(f.read()))
+
+
+# Output file contents by hash
+def cat_file(args):
+    sys.stdout.flush()
+    sys.stdout.buffer.write(data.get_object(args.object))
