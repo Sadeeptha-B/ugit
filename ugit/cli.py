@@ -56,4 +56,4 @@ def cat_file(args):
 
 # Stores current directory in the object database. In git lingo a "tree" means a directory
 def write_tree(args):
-    base.write_tree()
+    print(base.write_tree())
