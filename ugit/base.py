@@ -40,5 +40,44 @@ def write_tree(directory='.'):
     return data.hash_object(tree.encode(), 'tree')
 
 
+def read_tree(tree_oid):
+    for path, oid in get_tree(tree_oid, base_path='.').items():
+        os.makedirs(os.path.dirname(path), exist_ok = True)
+        with open(path, 'wb') as f:
+            f.write(data.get_object(oid))
+
+'''
+Uses iterator to recursively parse tree entries into a dictionary
+'''
+def get_tree(oid, base_path=''):
+    result = {}
+    for type_, oid, name in _iter_tree_entries(oid):
+        
+        assert name not in ('..', '.')
+
+        path = os.path.join(base_path, name)
+        if type_ == 'blob':
+            result[path] = oid
+        elif type == 'tree':
+            # Return val
+            result.update(get_tree(oid, path))
+        else:
+            raise ValueError(f'Unknown tree entry {type_}')
+
+    return result
+
+'''Iterator'''
+def _iter_tree_entries(oid):
+    if not oid:
+        return
+    
+    # Content in bytes
+    tree = data.get_object(oid, 'tree')
+
+    # Return file contents, line by line as sequence
+    for entry in tree.decode().splitlines():
+        type_, oid, name = entry.split(' ', 2)
+        yield type_, oid, name
+
 def is_ignored(path):
     return '.ugit' in os.path.split(path)
