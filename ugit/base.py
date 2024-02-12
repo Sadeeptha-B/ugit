@@ -81,7 +81,9 @@ def _iter_tree_entries(oid):
         yield type_, oid, name
 
 def is_ignored(path):
-    return '.ugit' in os.path.split(path)
+    # https://stackoverflow.com/questions/3167154/how-to-split-a-dos-path-into-its-components-in-python
+    path = os.path.normpath(path)
+    return '.ugit' in path.split(os.sep)
 
 
 def _empty_current_directory():
