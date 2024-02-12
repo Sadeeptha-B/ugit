@@ -41,6 +41,7 @@ def write_tree(directory='.'):
 
 
 def read_tree(tree_oid):
+    _empty_current_directory()
     for path, oid in get_tree(tree_oid, base_path='.').items():
         os.makedirs(os.path.dirname(path), exist_ok = True)
         with open(path, 'wb') as f:
@@ -81,3 +82,25 @@ def _iter_tree_entries(oid):
 
 def is_ignored(path):
     return '.ugit' in os.path.split(path)
+
+
+def _empty_current_directory():
+    # Goes through the files and directories bottom up first
+    for root, dirnames, filenames in os.walk('.', topdown=False):
+        for filename in filenames:
+            path = os.path.relpath(os.path.join(root, filename))
+            if is_ignored(path) or not os.path.isfile(path):
+                continue
+            os.remove(path)
+        
+        for dirname in dirnames:
+            path = os.path.relpath(os.path.join(root, dirname))
+            if is_ignored(path):
+                continue
+            try:
+                # Since the traversal happens bottom up, no files are missed. 
+                os.rmdir(path)
+            except (FileNotFoundError, OSError):
+                # Deletion might fail if the directory contains unremoved files; i.e. ignored files
+                # That is fine
+                pass
