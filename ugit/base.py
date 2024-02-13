@@ -37,6 +37,7 @@ def write_tree(directory='.'):
                    for name, oid, type_
                    in sorted(entries))
     
+    # tree string encoded in base64
     return data.hash_object(tree.encode(), 'tree')
 
 
@@ -106,3 +107,15 @@ def _empty_current_directory():
                 # Deletion might fail if the directory contains unremoved files; i.e. ignored files
                 # That is fine
                 pass
+
+'''
+Commit functionality: Making use of write-tree
+'''
+def commit(message):
+    commit = f'tree {write_tree()}\n'
+    commit += '\n'
+    commit += f'{message}\n'
+
+    # Commit is hashed into the object database with the type 'commit' and the commit string containing 
+    # the message, tree oid is encoded in base64
+    return data.hash_object(commit.encode(), 'commit')
