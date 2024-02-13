@@ -110,6 +110,8 @@ def _empty_current_directory():
 
 '''
 Commit functionality: Making use of write-tree
+Currently only the oid of the tree directory and the commit message is written to the commit file in the
+obj database 
 '''
 def commit(message):
     commit = f'tree {write_tree()}\n'
@@ -118,4 +120,7 @@ def commit(message):
 
     # Commit is hashed into the object database with the type 'commit' and the commit string containing 
     # the message, tree oid is encoded in base64
-    return data.hash_object(commit.encode(), 'commit')
+    oid = data.hash_object(commit.encode(), 'commit')
+    data.set_HEAD(oid)
+    return oid
+
